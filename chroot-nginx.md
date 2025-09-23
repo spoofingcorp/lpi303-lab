@@ -180,4 +180,3 @@ sudo nginx-chroot.sh stop
 
 ---
 
-Souhaitez-vous que je vous génère aussi un **schéma illustré** du lab (flux réseau et isolement chroot) pour vos supports de formation ?
