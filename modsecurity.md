@@ -236,7 +236,7 @@ Indiquez à Apache de charger les fichiers du CRS. Ajoutez les lignes suivantes 
         # Keeping your local configuration in that directory
         # will allow for an easy upgrade of THIS file and
         # make your life easier
-#        IncludeOptional /etc/modsecurity/*.conf     #### COMMENTER
+        IncludeOptional /etc/modsecurity/*.conf
 
         # Include OWASP ModSecurity CRS rules if installed
 #       IncludeOptional /usr/share/modsecurity-crs/*.load    #### COMMENTER
@@ -294,7 +294,7 @@ SecRule REQUEST_HEADERS:Host "@rx (?:^([\d.]+|\[[\da-f:]+\]|[\da-f:]+)(:[\d]+)?$
 
 ### Moteur ModSecurity
 
-`nano /etc/apache2/modsecurity-crs/crs-setup.conf -c`
+`nano /etc/modsecurity/crs-setup.conf -c`
 
 ```
 SecRuleEngine On
