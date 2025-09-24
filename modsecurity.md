@@ -54,6 +54,7 @@ La configuration d'un pare-feu au niveau de l'hôte est une étape de sécurité
   * **Autoriser le trafic web standard (`HTTP` & `HTTPS`)**
     ```bash
     sudo ufw allow 'Apache Full'
+    sudo ufw allow 'OpenSSH'
     ```
   * **Activer le pare-feu**
     ```bash
@@ -145,7 +146,7 @@ ModSecurity est le **moteur**, mais le CRS est le **"cerveau"**. C'est cet ensem
 2.  **Extraire et organiser les fichiers**
     ```bash
     tar -xzvf ${VERSION}.tar.gz
-    sudo mv coreruleset-${VERSION} /etc/apache2/modsecurity-crs
+    sudo mv coreruleset-${VERSION/v/} /etc/apache2/modsecurity-crs
     ```
 
 #### **3.3 Configuration de `crs-setup.conf` : Niveaux de paranoïa**
@@ -166,25 +167,142 @@ Le fichier `crs-setup.conf` permet de définir les **Niveaux de Paranoïa (Paran
 | **PL3** | Sécurité complète avec des règles plus restrictives.                                                     | Applications à haute sécurité (gouvernement, finance).          | Élevé                   |
 | **PL4** | Niveau paranoïaque. Extrêmement restrictif pour une sécurité maximale.                                    | API ou segments d'application avec un trafic très prévisible.   | Très élevé              |
 
-Pour commencer, il est recommandé de définir le niveau de paranoïa à **1** dans `crs-setup.conf`.
+Pour commencer, il est recommandé de définir le niveau de paranoïa à **1** dans `nano /etc/apache2/modsecurity-crs/crs-setup.conf -c`
+
+Cherchez la section suivante (autour de la ligne 100 selon la version), vérifier
+
+```
+SecDefaultAction "phase:1,log,auditlog,deny,status:403"
+SecDefaultAction "phase:2,log,auditlog,deny,status:403"
+```
+Cherchez la section suivante (autour de la ligne 180 selon la version), vérifier
+
+```
+# Uncomment this rule to change the default:
+#
+SecAction \
+    "id:900000,\
+    phase:1,\
+    pass,\
+    t:none,\
+    nolog,\
+    tag:'OWASP_CRS',\
+    ver:'OWASP_CRS/4.18.0',\
+    setvar:tx.blocking_paranoia_level=1"
+```
+
+Cherchez la section suivante (à la fin), vérifier
+
+```
+# The variable is a numerical representation of the CRS version number.
+# E.g., v3.0.0 is represented as 300.
+#
+SecAction \
+    "id:900990,\ 
+    phase:1,\
+    pass,\ 
+    t:none,\
+    nolog,\
+    tag:'OWASP_CRS',\
+    ver:'OWASP_CRS/4.18.0',\
+    setvar:tx.crs_setup_version=4180"
+```
+
+Différence avec SecDefaultAction
+
+- SecDefaultAction : Définit l’action par défaut appliquée à chaque règle du CRS (ex. loguer, bloquer, laisser passer).
+- phase:1 → analyse en début de requête
+- log,auditlog → écrit dans les logs et l’audit log
+- pass → ne bloque pas automatiquement à ce stade (c’est le mode Anomaly Scoring qui décide plus tard).
+- SecAction setvar:tx.paranoia_level=1 : Définit le niveau de paranoïa (= quelles règles seront chargées).
+
 
 #### **3.4 Activation du CRS dans la configuration d'Apache**
 
 Indiquez à Apache de charger les fichiers du CRS. Ajoutez les lignes suivantes à la fin de `/etc/apache2/mods-enabled/security2.conf`.
 
-```apache
+```
 <IfModule security2_module>
-    # ... autres directives existantes ...
+        # Default Debian dir for modsecurity's persistent data
+        SecDataDir /var/cache/modsecurity
 
-    # Inclure la configuration du CRS (DOIT ÊTRE EN PREMIER)
-    IncludeOptional /etc/apache2/modsecurity-crs/crs-setup.conf
 
-    # Inclure les fichiers de règles du CRS
-    IncludeOptional /etc/apache2/modsecurity-crs/rules/*.conf
+        # Inclure la configuration du CRS (DOIT ÊTRE EN PREMIER)
+        IncludeOptional /etc/apache2/modsecurity-crs/crs-setup.conf
+        # Inclure les fichiers de règles du CRS
+        IncludeOptional /etc/apache2/modsecurity-crs/rules/*.conf
+
+        # Include all the *.conf files in /etc/modsecurity.
+        # Keeping your local configuration in that directory
+        # will allow for an easy upgrade of THIS file and
+        # make your life easier
+        IncludeOptional /etc/modsecurity/*.conf
+
+        # Include OWASP ModSecurity CRS rules if installed
+#       IncludeOptional /usr/share/modsecurity-crs/*.load    #### COMMENTER
 </IfModule>
 ```
 
 -----
+
+### Activer ModSecurity sur le default site Apache
+
+/etc/apache2/sites-enabled/000-default.conf      
+
+```
+<VirtualHost *:80>
+        #ServerName www.example.com
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+
+        SecRuleEngine On   #### AJOUTER CETTE OPTION
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+#### Désactiver la RULES bloqué l'accès via IP
+
+Si vous faites un curl apprésent, le site ne sera pas accesible car nous n'avons pas de noms de domaine.
+
+ModSecurity: Warning. Pattern match "(?:^([\\\\d.]+|\\\\[[\\\\da-f:]+\\\\]|[\\\\da-f:]+)(:[\\\\d]+)?$)" at REQUEST_HEADERS:Host. [file "/etc/apache2/modsecurity-crs/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"] [line "728"] [id "920350"] [msg "Host header is a numeric IP address"] [data "192.168.20.180"] [severity "WARNING"] 
+
+#### Editer la Rules REQUEST-920-PROTOCOL-ENFORCEMENT.conf (vers la ligne 714) pour pass Host header is a numeric IP address
+
+`nano /etc/apache2/modsecurity-crs/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf -c`
+
+```
+SecRule REQUEST_HEADERS:Host "@rx (?:^([\d.]+|\[[\da-f:]+\]|[\da-f:]+)(:[\d]+)?$)" \
+"id:920350,\
+    phase:1,\
+    pass,\  ### PASSER de block à pass
+    t:none,\
+    msg:'Host header is a numeric IP address',\
+    logdata:'%{MATCHED_VAR}',\
+    tag:'application-multi',\
+    tag:'language-multi',\
+    tag:'platform-multi',\
+    tag:'attack-protocol',\
+    tag:'paranoia-level/1',\
+    tag:'OWASP_CRS',\
+    tag:'OWASP_CRS/PROTOCOL-ENFORCEMENT',\
+    tag:'capec/1000/210/272',\
+    ver:'OWASP_CRS/4.18.0',\
+    severity:'WARNING',\
+    setvar:'tx.inbound_anomaly_score_pl1=+%{tx.warning_anomaly_score}'"
+```
+
+### Moteur ModSecurity
+
+`nano /etc/modsecurity/crs-setup.conf -c`
+
+```
+SecRuleEngine On
+SecRequestBodyAccess On
+SecResponseBodyAccess On
+SecAuditEngine RelevantOnly
+```
+
 
 ### **4.0 Section 4 : Vérification du système et simulation d'attaques**
 
