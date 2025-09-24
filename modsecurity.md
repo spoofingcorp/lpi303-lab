@@ -168,6 +168,19 @@ Le fichier `crs-setup.conf` permet de définir les **Niveaux de Paranoïa (Paran
 
 Pour commencer, il est recommandé de définir le niveau de paranoïa à **1** dans `crs-setup.conf`.
 
+Cherchez la section suivante (autour de la ligne 70–100 selon la version) :
+
+# -- Paranoia Level --
+# Paranoia levels can be set from 1 to 4.
+# The default is 1 (most practical).
+SecAction \
+ "id:900000,\
+  phase:1,\
+  nolog,\
+  pass,\
+  t:none,\
+  setvar:tx.paranoia_level=1"
+
 #### **3.4 Activation du CRS dans la configuration d'Apache**
 
 Indiquez à Apache de charger les fichiers du CRS. Ajoutez les lignes suivantes à la fin de `/etc/apache2/mods-enabled/security2.conf`.
