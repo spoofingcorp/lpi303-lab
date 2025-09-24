@@ -170,6 +170,7 @@ Pour commencer, il est recommandé de définir le niveau de paranoïa à **1** d
 
 Cherchez la section suivante (autour de la ligne 70–100 selon la version) :
 
+```
 # -- Paranoia Level --
 # Paranoia levels can be set from 1 to 4.
 # The default is 1 (most practical).
@@ -180,6 +181,7 @@ SecAction \
   pass,\
   t:none,\
   setvar:tx.paranoia_level=1"
+```
 
 #### **3.4 Activation du CRS dans la configuration d'Apache**
 
