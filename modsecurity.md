@@ -183,6 +183,15 @@ SecAction \
   setvar:tx.paranoia_level=1"
 ```
 
+Différence avec SecDefaultAction
+
+- SecDefaultAction : Définit l’action par défaut appliquée à chaque règle du CRS (ex. loguer, bloquer, laisser passer).
+- phase:1 → analyse en début de requête
+- log,auditlog → écrit dans les logs et l’audit log
+- pass → ne bloque pas automatiquement à ce stade (c’est le mode Anomaly Scoring qui décide plus tard).
+- SecAction setvar:tx.paranoia_level=1 : Définit le niveau de paranoïa (= quelles règles seront chargées).
+
+
 #### **3.4 Activation du CRS dans la configuration d'Apache**
 
 Indiquez à Apache de charger les fichiers du CRS. Ajoutez les lignes suivantes à la fin de `/etc/apache2/mods-enabled/security2.conf`.
