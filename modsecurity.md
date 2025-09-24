@@ -145,7 +145,7 @@ ModSecurity est le **moteur**, mais le CRS est le **"cerveau"**. C'est cet ensem
 2.  **Extraire et organiser les fichiers**
     ```bash
     tar -xzvf ${VERSION}.tar.gz
-    sudo mv coreruleset-${VERSION} /etc/apache2/modsecurity-crs
+    sudo mv coreruleset-${VERSION/v/} /etc/apache2/modsecurity-crs
     ```
 
 #### **3.3 Configuration de `crs-setup.conf` : Niveaux de paranoïa**
