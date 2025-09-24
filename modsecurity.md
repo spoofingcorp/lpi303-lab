@@ -168,19 +168,20 @@ Le fichier `crs-setup.conf` permet de définir les **Niveaux de Paranoïa (Paran
 
 Pour commencer, il est recommandé de définir le niveau de paranoïa à **1** dans `crs-setup.conf`.
 
-Cherchez la section suivante (autour de la ligne 70–100 selon la version) :
+Cherchez la section suivante (autour de la ligne 177 selon la version), et décommenter
 
 ```
-# -- Paranoia Level --
-# Paranoia levels can be set from 1 to 4.
-# The default is 1 (most practical).
+# Uncomment this rule to change the default:
+#
 SecAction \
- "id:900000,\
-  phase:1,\
-  nolog,\
-  pass,\
-  t:none,\
-  setvar:tx.paranoia_level=1"
+    "id:900000,\
+    phase:1,\
+    pass,\
+    t:none,\
+    nolog,\
+    tag:'OWASP_CRS',\
+    ver:'OWASP_CRS/4.18.0',\
+    setvar:tx.blocking_paranoia_level=1"
 ```
 
 Différence avec SecDefaultAction
