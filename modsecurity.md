@@ -167,7 +167,7 @@ Le fichier `crs-setup.conf` permet de définir les **Niveaux de Paranoïa (Paran
 | **PL3** | Sécurité complète avec des règles plus restrictives.                                                     | Applications à haute sécurité (gouvernement, finance).          | Élevé                   |
 | **PL4** | Niveau paranoïaque. Extrêmement restrictif pour une sécurité maximale.                                    | API ou segments d'application avec un trafic très prévisible.   | Très élevé              |
 
-Pour commencer, il est recommandé de définir le niveau de paranoïa à **1** dans `crs-setup.conf`.
+Pour commencer, il est recommandé de définir le niveau de paranoïa à **1** dans `nano /etc/apache2/modsecurity-crs/crs-setup.conf -c`
 
 Cherchez la section suivante (autour de la ligne 100 selon la version), vérifier
 
