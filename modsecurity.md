@@ -54,6 +54,7 @@ La configuration d'un pare-feu au niveau de l'hôte est une étape de sécurité
   * **Autoriser le trafic web standard (`HTTP` & `HTTPS`)**
     ```bash
     sudo ufw allow 'Apache Full'
+    sudo ufw allow 'OpenSSH'
     ```
   * **Activer le pare-feu**
     ```bash
@@ -168,7 +169,13 @@ Le fichier `crs-setup.conf` permet de définir les **Niveaux de Paranoïa (Paran
 
 Pour commencer, il est recommandé de définir le niveau de paranoïa à **1** dans `crs-setup.conf`.
 
-Cherchez la section suivante (autour de la ligne 177 selon la version), et décommenter
+Cherchez la section suivante (autour de la ligne 100 selon la version), vérifier
+
+```
+SecDefaultAction "phase:1,log,auditlog,deny,status:403"
+SecDefaultAction "phase:2,log,auditlog,deny,status:403"
+```
+Cherchez la section suivante (autour de la ligne 180 selon la version), vérifier
 
 ```
 # Uncomment this rule to change the default:
@@ -182,6 +189,23 @@ SecAction \
     tag:'OWASP_CRS',\
     ver:'OWASP_CRS/4.18.0',\
     setvar:tx.blocking_paranoia_level=1"
+```
+
+Cherchez la section suivante (à la fin), vérifier
+
+```
+# The variable is a numerical representation of the CRS version number.
+# E.g., v3.0.0 is represented as 300.
+#
+SecAction \
+    "id:900990,\ 
+    phase:1,\
+    pass,\ 
+    t:none,\
+    nolog,\
+    tag:'OWASP_CRS',\
+    ver:'OWASP_CRS/4.18.0',\
+    setvar:tx.crs_setup_version=4180"
 ```
 
 Différence avec SecDefaultAction
