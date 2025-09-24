@@ -105,6 +105,7 @@ Plutôt que d'ignorer aveuglément les avertissements, une approche professionne
    ```
 
    Cette commande confirmera que /usr/sbin/tcpd appartient au paquet tcpd.  
+
 2. Vérifier l'intégrité cryptographique avec debsums:  
    L'outil debsums est un utilitaire puissant qui compare les sommes de contrôle MD5 des fichiers installés sur le système avec les sommes de contrôle originales stockées dans la base de données de dpkg. C'est le moyen le plus fiable de prouver qu'un fichier n'a pas été altéré depuis son installation.
 
@@ -117,10 +118,10 @@ Plutôt que d'ignorer aveuglément les avertissements, une approche professionne
    ```Bash  
    sudo debsums \-as
    ```
-
    Si cette commande ne renvoie aucune sortie pour le fichier signalé par chkrootkit, on peut conclure avec un haut degré de certitude que le fichier est intact et que l'alerte était un faux positif.  
+
 3. Alternative : Utiliser dpkg \--verify:  
-   Une autre méthode intégrée est la commande dpkg \--verify (ou \-V). Elle effectue une vérification similaire mais son format de sortie est moins direct. Elle signale les différences de somme de contrôle avec un '5' dans la sortie.23  
+   Une autre méthode intégrée est la commande dpkg \--verify (ou \-V). Elle effectue une vérification similaire mais son format de sortie est moins direct. Elle signale les différences de somme de contrôle avec un '5' dans la sortie.  
    ```Bash  
    sudo dpkg \--verify tcpd
    ```
@@ -212,7 +213,8 @@ sudo nano /etc/rkhunter.conf
   WEB\_CMD\=""
 ```
 
-  Ces paramètres indiquent à rkhunter d'utiliser plusieurs miroirs de mise à jour et de ne pas utiliser de commande de téléchargement externe spécifique, en s'appuyant sur ses méthodes internes.3  
+  Ces paramètres indiquent à rkhunter d'utiliser plusieurs miroirs de mise à jour et de ne pas utiliser de commande de téléchargement externe spécifique, en s'appuyant sur ses méthodes internes.  
+  
 * **Intégration avec le gestionnaire de paquets** : C'est l'un des paramètres les plus importants pour les systèmes basés sur Debian/Ubuntu. En définissant PKGMGR sur DPKG, rkhunter utilisera la base de données du gestionnaire de paquets pour vérifier les propriétés des fichiers. Cela réduit considérablement les faux positifs, car l'outil peut distinguer une modification légitime (via une mise à jour de paquet) d'une modification suspecte.  
 ```
   Properties  
@@ -303,7 +305,7 @@ Les directives de mise en liste blanche se trouvent dans /etc/rkhunter.conf.
   ```
 
   Des versions plus anciennes de rkhunter avaient des bogues qui empêchaient la mise en liste blanche correcte des liens symboliques, mais ces problèmes sont résolus dans les versions modernes incluses dans Ubuntu 24.04.34  
-* **SCRIPTWHITELIST** : Certains scripts shell, en particulier ceux qui sont obfusqués ou compressés, peuvent être signalés comme suspects. Si après vérification, un script est jugé sûr, il peut être ajouté à la liste blanche.28  
+* **SCRIPTWHITELIST** : Certains scripts shell, en particulier ceux qui sont obfusqués ou compressés, peuvent être signalés comme suspects. Si après vérification, un script est jugé sûr, il peut être ajouté à la liste blanche.  
   ```
   Properties  
   SCRIPTWHITELIST\=/usr/bin/mon\_script\_personnalise
@@ -378,7 +380,8 @@ Le fichier /usr/local/maldetect/conf.maldet est le centre de contrôle de LMD. U
 * **Actions de quarantaine** : C'est la fonctionnalité de réponse active de LMD.  
   * quarantine\_hits="1": Lorsque cette option est activée, tout fichier identifié comme malveillant est immédiatement déplacé vers le répertoire de quarantaine (/usr/local/maldetect/quarantine), le rendant inoffensif.  
   * quarantine\_clean="1": Cette option va plus loin. Pour les menaces connues basées sur des injections de chaînes (par exemple, du code malveillant encodé en base64 injecté dans un fichier PHP légitime), LMD tentera de supprimer l'injection malveillante et de restaurer le fichier nettoyé.  
-    Il est recommandé de commencer avec quarantine\_hits="1" et quarantine\_clean="0". Cela permet de contenir les menaces tout en donnant à l'administrateur la possibilité d'examiner les fichiers mis en quarantaine avant de tenter un nettoyage, ce qui évite la perte potentielle de données si le nettoyage échoue ou si l'alerte est un faux positif.7  
+    Il est recommandé de commencer avec quarantine\_hits="1" et quarantine\_clean="0". Cela permet de contenir les menaces tout en donnant à l'administrateur la possibilité d'examiner les fichiers mis en quarantaine avant de tenter un nettoyage, ce qui évite la perte potentielle de données si le nettoyage échoue ou si l'alerte est un faux positif.
+    
 * **Mises à jour automatiques** : Pour maintenir l'efficacité de LMD, il est crucial de garder ses signatures et le logiciel lui-même à jour.  
   ```
   Properties  
@@ -413,7 +416,7 @@ LMD offre plusieurs façons de lancer des analyses, adaptées à différents sc�
   sudo maldet \--report \<SCAN\_ID\>
   ```
 
-  L'ID de l'analyse est affiché à la fin de l'exécution de l'analyse.4
+  L'ID de l'analyse est affiché à la fin de l'exécution de l'analyse.
 
 La gestion de la quarantaine est une tâche opérationnelle clé. LMD fournit un ensemble complet de commandes pour cela :
 
