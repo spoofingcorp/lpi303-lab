@@ -197,19 +197,76 @@ Différence avec SecDefaultAction
 
 Indiquez à Apache de charger les fichiers du CRS. Ajoutez les lignes suivantes à la fin de `/etc/apache2/mods-enabled/security2.conf`.
 
-```apache
+```
 <IfModule security2_module>
-    # ... autres directives existantes ...
+        # Default Debian dir for modsecurity's persistent data
+        SecDataDir /var/cache/modsecurity
 
-    # Inclure la configuration du CRS (DOIT ÊTRE EN PREMIER)
-    IncludeOptional /etc/apache2/modsecurity-crs/crs-setup.conf
 
-    # Inclure les fichiers de règles du CRS
-    IncludeOptional /etc/apache2/modsecurity-crs/rules/*.conf
+        # Inclure la configuration du CRS (DOIT ÊTRE EN PREMIER)
+        IncludeOptional /etc/apache2/modsecurity-crs/crs-setup.conf
+        # Inclure les fichiers de règles du CRS
+        IncludeOptional /etc/apache2/modsecurity-crs/rules/*.conf
+
+        # Include all the *.conf files in /etc/modsecurity.
+        # Keeping your local configuration in that directory
+        # will allow for an easy upgrade of THIS file and
+        # make your life easier
+#        IncludeOptional /etc/modsecurity/*.conf     #### COMMENTER
+
+        # Include OWASP ModSecurity CRS rules if installed
+#       IncludeOptional /usr/share/modsecurity-crs/*.load    #### COMMENTER
 </IfModule>
 ```
 
 -----
+
+### Activer ModSecurity sur le default site Apache
+
+/etc/apache2/sites-enabled/000-default.conf      
+
+```
+<VirtualHost *:80>
+        #ServerName www.example.com
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+
+        SecRuleEngine On   #### AJOUTER CETTE OPTION
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+#### Désactiver la RULES bloqué l'accès via IP
+
+Si vous faites un curl apprésent, le site ne sera pas accesible car nous n'avons pas de noms de domaine.
+
+ModSecurity: Warning. Pattern match "(?:^([\\\\d.]+|\\\\[[\\\\da-f:]+\\\\]|[\\\\da-f:]+)(:[\\\\d]+)?$)" at REQUEST_HEADERS:Host. [file "/etc/apache2/modsecurity-crs/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf"] [line "728"] [id "920350"] [msg "Host header is a numeric IP address"] [data "192.168.20.180"] [severity "WARNING"] 
+
+#### Editer la Rules REQUEST-920-PROTOCOL-ENFORCEMENT.conf (vers la ligne 714) pour pass Host header is a numeric IP address
+
+`nano /etc/apache2/modsecurity-crs/rules/REQUEST-920-PROTOCOL-ENFORCEMENT.conf -c`
+
+```
+SecRule REQUEST_HEADERS:Host "@rx (?:^([\d.]+|\[[\da-f:]+\]|[\da-f:]+)(:[\d]+)?$)" \
+"id:920350,\
+    phase:1,\
+    pass,\  ### PASSER de block à pass
+    t:none,\
+    msg:'Host header is a numeric IP address',\
+    logdata:'%{MATCHED_VAR}',\
+    tag:'application-multi',\
+    tag:'language-multi',\
+    tag:'platform-multi',\
+    tag:'attack-protocol',\
+    tag:'paranoia-level/1',\
+    tag:'OWASP_CRS',\
+    tag:'OWASP_CRS/PROTOCOL-ENFORCEMENT',\
+    tag:'capec/1000/210/272',\
+    ver:'OWASP_CRS/4.18.0',\
+    severity:'WARNING',\
+    setvar:'tx.inbound_anomaly_score_pl1=+%{tx.warning_anomaly_score}'"
+```
 
 ### **4.0 Section 4 : Vérification du système et simulation d'attaques**
 
