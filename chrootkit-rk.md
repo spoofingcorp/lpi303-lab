@@ -257,7 +257,7 @@ sudo nano /etc/default/rkhunter
   CRON\_DB\_UPDATE\="true"
     ```
 
-* **Mise à jour automatique de la base de référence après les mises à jour apt** : C'est une fonctionnalité essentielle pour la maintenabilité. Lorsque cette option est activée, rkhunter \--propupd est exécuté automatiquement après chaque transaction apt. Cela maintient la base de référence des propriétés des fichiers synchronisée avec les mises à jour légitimes du système, éliminant ainsi la principale source de faux positifs.25 Cette intégration transparente avec le cycle de vie du gestionnaire de paquets transforme rkhunter en un moniteur d'intégrité dynamique et intelligent.  
+* **Mise à jour automatique de la base de référence après les mises à jour apt** : C'est une fonctionnalité essentielle pour la maintenabilité. Lorsque cette option est activée, rkhunter \--propupd est exécuté automatiquement après chaque transaction apt. Cela maintient la base de référence des propriétés des fichiers synchronisée avec les mises à jour légitimes du système, éliminant ainsi la principale source de faux positifs. Cette intégration transparente avec le cycle de vie du gestionnaire de paquets transforme rkhunter en un moniteur d'intégrité dynamique et intelligent.  
   ```
   Properties  
   APT\_AUTOGEN\="yes"
