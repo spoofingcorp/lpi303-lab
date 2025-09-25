@@ -242,25 +242,7 @@ Indiquez à Apache de charger les fichiers du CRS. Ajoutez les lignes suivantes 
 #       IncludeOptional /usr/share/modsecurity-crs/*.load    #### COMMENTER
 </IfModule>
 ```
-
 -----
-
-### Activer ModSecurity sur le default site Apache
-
-/etc/apache2/sites-enabled/000-default.conf      
-
-```
-<VirtualHost *:80>
-        #ServerName www.example.com
-        ServerAdmin webmaster@localhost
-        DocumentRoot /var/www/html
-
-        SecRuleEngine On   #### AJOUTER CETTE OPTION
-
-        ErrorLog ${APACHE_LOG_DIR}/error.log
-        CustomLog ${APACHE_LOG_DIR}/access.log combined
-</VirtualHost>
-```
 #### Désactiver la RULES bloqué l'accès via IP
 
 Si vous faites un curl apprésent, le site ne sera pas accesible car nous n'avons pas de noms de domaine.
