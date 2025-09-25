@@ -100,7 +100,8 @@ Plutôt que d'ignorer aveuglément les avertissements, une approche professionne
 
 1. Identifier le propriétaire du paquet avec dpkg:  
    La première étape consiste à déterminer quel paquet a installé le fichier signalé. La commande dpkg \-S recherche dans la base de données du gestionnaire de paquets pour trouver le propriétaire d'un fichier donné.
-   ```Bash  
+   ```Bash
+   sudo apt install tcpd \-y
    dpkg \-S /usr/sbin/tcpd
    ```
 
