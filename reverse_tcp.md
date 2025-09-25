@@ -133,12 +133,12 @@ cd linux-malware-detect/
 ./install.sh
 ```
 
-# Lancer un scan sur le répertoire où le payload a été téléchargé (ex: /home/user/)
-sudo maldet -a /home/user/
+# Lancer un scan sur le répertoire où le payload a été téléchargé (Cibler l'emplacement du payload)
+`sudo maldet -a /home/user/`
 
 # Un scan plus large du système de fichiers temporaires est aussi une bonne idée
-sudo maldet -a /tmp/
-```
+`sudo maldet -a /tmp/`
+
 
 **Résultat attendu :** LMD devrait trouver le fichier `payload.bin` et le signaler comme une menace, en se basant sur sa base de données de signatures (par exemple, `LMD.Payload.23`).
 
