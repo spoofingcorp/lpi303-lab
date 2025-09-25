@@ -126,7 +126,12 @@ LMD est excellent pour scanner les fichiers et trouver des signatures de logicie
 
 ```bash
 # Installer maldetect s'il n'est pas présent (Debian/Ubuntu)
-# sudo apt-get install maldet
+#
+cd /tmp  
+git clone https://github.com/rfxn/linux-malware-detect.git
+cd linux-malware-detect/
+./install.sh
+
 
 # Lancer un scan sur le répertoire où le payload a été téléchargé (ex: /home/user/)
 sudo maldet -a /home/user/
