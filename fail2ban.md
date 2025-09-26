@@ -198,7 +198,6 @@ failregex \= ^\<HOST\>.\*"(GET|POST).\*" (404|403).\*$
 
 Ensuite, la prison correspondante est définie dans /etc/fail2ban/jail.d/nginx.local.24
 
-
 ```
 \[nginx-4xx\]  
 enabled  \= true  
