@@ -411,28 +411,3 @@ La mise en place d'un WAF efficace est un processus méthodique. Les points clé
 
 Ce guide a couvert les fondations essentielles. Les étapes suivantes incluent l'écriture de règles personnalisées, la création d'exclusions plus granulaires (`SecRuleUpdateTargetById`) et l'intégration des journaux dans un système **SIEM** (Security Information and Event Management) pour une surveillance centralisée.
 
-### **Sources des citations**
-
-1.  Apache2 : installer le ModSecurity (WAF) - RDR-IT
-2.  Notes on installing ModSecurity and applying it to Apache (Ubuntu 24.04 LTS)
-3.  How To Configure Apache Security on Ubuntu & Debian – TecAdmin
-4.  How to Install the ModSecurity Apache Module - InMotion Hosting
-5.  How to Install Apache Web Server on Ubuntu 24.04 - Vultr Docs
-6.  How to use Apache2 modules - Ubuntu Server documentation
-7.  owasp-modsecurity/ModSecurity - GitHub
-8.  coreruleset/coreruleset: OWASP CRS (Official Repository) - GitHub
-9.  OWASP CRS Project - Releases
-10. OWASP CRS Dev Guide
-11. How to Install and Configure ModSecurity on Apache for Ubuntu
-12. Comprehensive Guide to ModSecurity: Logs, Configuration, and Important Limits
-13. ModSecurity Handbook: Getting Started: Chapter 4. Logging - Feisty Duck
-14. Upgrading the provided OWASP Core Rule Set of ModSecurity - Nevis documentation
-15. OWASP ModSecurity Core Rule Set (CRS) Project (Official Repository) - GitHub (SpiderLabs - Ancien)
-16. CRS versions 4.8.0 and 3.3.7 released - Coreruleset.org
-17. Security Overview · coreruleset/coreruleset - GitHub
-18. Releases · coreruleset/coreruleset - GitHub
-19. OWASP CRS Project
-20. NGINX + ModSecurity v3 + OWASP CRS on Ubuntu 24.04 LTS – Step by Step – Part 2
-21. CRS Installation :: CRS Documentation - OWASP CRS Project
-22. mod security - Test whether mod\_security is actually working - Server Fault
-23. ModSecurity: Logging and Debugging - F5
