@@ -274,17 +274,6 @@ SecRule REQUEST_HEADERS:Host "@rx (?:^([\d.]+|\[[\da-f:]+\]|[\da-f:]+)(:[\d]+)?$
     setvar:'tx.inbound_anomaly_score_pl1=+%{tx.warning_anomaly_score}'"
 ```
 
-### Moteur ModSecurity
-
-`nano /etc/modsecurity/crs-setup.conf -c`
-
-```
-SecRuleEngine On
-SecRequestBodyAccess On
-SecResponseBodyAccess On
-SecAuditEngine RelevantOnly
-```
-
 
 ### **4.0 Section 4 : Vérification du système et simulation d'attaques**
 
