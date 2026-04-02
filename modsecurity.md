@@ -487,7 +487,11 @@ if (isset($_POST['login'])) {
     $result = $conn->query($sql_select);
 
     if ($result && $result->num_rows > 0) {
-        echo "<p style='background-color:green; color:white; padding:10px;'>Connexion RÉUSSIE en tant que : " . htmlspecialchars($log_user) . "</p>";
+        // MODIFICATION ICI : On extrait la ligne renvoyée par MariaDB
+        $utilisateur_trouve = $result->fetch_assoc(); 
+        
+        // On affiche le contenu de la colonne 'username' calculée par la BDD
+        echo "<p style='background-color:green; color:white; padding:10px;'>Connexion RÉUSSIE en tant que : " . htmlspecialchars($utilisateur_trouve['username']) . "</p>";
     } else {
         echo "<p style='background-color:red; color:white; padding:10px;'>Échec de la connexion. Identifiants incorrects.</p>";
     }
@@ -535,6 +539,38 @@ Comme 1=1 est toujours vrai, la base de données renverra le premier utilisateur
 http://<votre_ip_serveur>/?id=1' OR 1=1--
 
 
+## Attaque par l'UNION
+
+Le concept de l'attaque UNION
+L'opérateur SQL UNION permet de combiner les résultats de deux requêtes SELECT distinctes en un seul tableau de résultats.
+
+Dans votre script, la requête d'origine est :
+`SELECT * FROM utilisateurs WHERE username = '$log_user' AND password = '...'`
+
+Le but de l'attaquant est d'injecter un second SELECT via le champ $log_user pour forcer la base de données à renvoyer des informations qu'elle ne devrait pas (comme des mots de passe ou la structure d'autres tables).
+
+La règle d'or du UNION : Les deux requêtes doivent demander exactement le même nombre de colonnes. Votre table utilisateurs possède 3 colonnes (id, username, password). Notre requête injectée devra donc aussi demander 3 éléments.
+
+L'attaque : Extraire le mot de passe de l'admin
+Voici comment construire cette attaque étape par étape via curl.
+
+L'idée est de faire échouer la première requête (en cherchant un utilisateur qui n'existe pas, comme "personne"), puis d'y attacher notre requête d'extraction avec UNION.
+
+Voici la charge utile (payload) que nous allons injecter dans le champ log_username :
+`' UNION SELECT 1, password, 3 FROM utilisateurs WHERE username='admin' #`
+
+Pourquoi cette construction ?
+
+`' `: Ferme la chaîne du nom d'utilisateur de la requête d'origine.
+
+UNION SELECT 1, password, 3 : Nous demandons 3 colonnes pour correspondre à la table d'origine. Nous mettons le champ password dans la 2ème colonne.
+
+`FROM utilisateurs WHERE username='admin'` : La cible de notre extraction.
+
+# : Commente le reste de la requête d'origine (le check du mot de passe).
+
+Exécution avec curl
+Exécutez cette commande dans votre terminal :
 
 ```
 curl -s -X POST http://localhost/index.php \
