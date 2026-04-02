@@ -520,7 +520,7 @@ Avant d'activer la protection ModSecurity, testez la vulnérabilité de votre fo
 Allez sur http://votre_ip_serveur/index.php.
 Dans le formulaire 2. Se connecter, entrez la charge utile (payload) classique suivante dans le champ "Utilisateur" :
 
-' OR '1'='1
+'  OR 1=1 -- -
 
 Et mettez n'importe quoi dans le mot de passe.
 
