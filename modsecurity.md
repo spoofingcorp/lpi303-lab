@@ -400,3 +400,136 @@ La mise en place d'un WAF efficace est un processus méthodique. Les points clé
 
 Ce guide a couvert les fondations essentielles. Les étapes suivantes incluent l'écriture de règles personnalisées, la création d'exclusions plus granulaires (`SecRuleUpdateTargetById`) et l'intégration des journaux dans un système **SIEM** (Security Information and Event Management) pour une surveillance centralisée.
 
+
+# Configuration PHP / MariaDB sur la stack
+
+### Étape 1 : Prérequis (Pile LAMP et ModSecurity)
+Assurez-vous que votre serveur web Apache, PHP, MariaDB et le module ModSecurity sont installés.
+
+```
+sudo apt update
+sudo apt install apache2 mariadb-server php php-mysqli libapache2-mod-security2
+```
+
+### Étape 2 : Préparation de la Base de Données (MariaDB)
+Nous allons créer une base de données, un utilisateur dédié et une table pour stocker les identifiants. Connectez-vous à MariaDB :
+
+```
+sudo mariadb
+Exécutez ensuite les commandes SQL suivantes :
+
+SQL
+-- Création de la base de données
+CREATE DATABASE lab_secu_db;
+
+-- Création d'un utilisateur local avec des droits restreints à cette BDD
+CREATE USER 'lab_user'@'localhost' IDENTIFIED BY 'SuperMotDePasse123!';
+GRANT ALL PRIVILEGES ON lab_secu_db.* TO 'lab_user'@'localhost';
+FLUSH PRIVILEGES;
+
+-- Utilisation de la base et création de la table
+USE lab_secu_db;
+CREATE TABLE utilisateurs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+-- Insertion d'un utilisateur légitime pour les tests
+INSERT INTO utilisateurs (username, password) VALUES ('admin', 'password_secret');
+exit;
+```
+
+### Étape 3 : Le Code PHP Vulnérable (Inscription et Connexion)
+Créez un fichier nommé index.php dans le répertoire racine de votre serveur web (généralement /var/www/html/). Supprimez le fichier index.html par défaut s'il existe.
+
+Ce script contient un formulaire pour enregistrer un utilisateur et un formulaire pour se connecter. Les deux sont intentionnellement vulnérables, car les entrées de l'utilisateur sont concaténées directement dans la requête SQL sans aucun nettoyage ni préparation.
+
+`sudo nano /var/www/html/index.php`
+
+```
+<?php
+$host = 'localhost';
+$db   = 'lab_secu_db';
+$user = 'lab_user';
+$pass = 'SuperMotDePasse123!';
+
+// Connexion à la base de données
+$conn = new mysqli($host, $user, $pass, $db);
+if ($conn->connect_error) {
+    die("Erreur de connexion : " . $conn->connect_error);
+}
+
+echo "<h2>Laboratoire ModSecurity - Injections SQL</h2>";
+
+// Traitement de l'inscription (Écriture en BDD)
+if (isset($_POST['register'])) {
+    $reg_user = $_POST['reg_username'];
+    $reg_pass = $_POST['reg_password'];
+
+    // VULNÉRABILITÉ : Concaténation directe dans l'INSERT
+    $sql_insert = "INSERT INTO utilisateurs (username, password) VALUES ('$reg_user', '$reg_pass')";
+    
+    if ($conn->query($sql_insert) === TRUE) {
+        echo "<p style='color:green;'>Nouvel utilisateur enregistré avec succès !</p>";
+    } else {
+        echo "<p style='color:red;'>Erreur : " . $conn->error . "</p>";
+    }
+}
+
+// Traitement de la connexion (Lecture en BDD)
+if (isset($_POST['login'])) {
+    $log_user = $_POST['log_username'];
+    $log_pass = $_POST['log_password'];
+
+    // VULNÉRABILITÉ : Concaténation directe dans le SELECT
+    $sql_select = "SELECT * FROM utilisateurs WHERE username = '$log_user' AND password = '$log_pass'";
+    $result = $conn->query($sql_select);
+
+    if ($result && $result->num_rows > 0) {
+        echo "<p style='background-color:green; color:white; padding:10px;'>Connexion RÉUSSIE en tant que : " . htmlspecialchars($log_user) . "</p>";
+    } else {
+        echo "<p style='background-color:red; color:white; padding:10px;'>Échec de la connexion. Identifiants incorrects.</p>";
+    }
+}
+?>
+
+<hr>
+<h3>1. Enregistrer un utilisateur</h3>
+<form method="POST" action="">
+    Utilisateur : <input type="text" name="reg_username"><br><br>
+    Mot de passe : <input type="password" name="reg_password"><br><br>
+    <input type="submit" name="register" value="S'inscrire">
+</form>
+
+<hr>
+<h3>2. Se connecter</h3>
+<form method="POST" action="">
+    Utilisateur : <input type="text" name="log_username"><br><br>
+    Mot de passe : <input type="password" name="log_password"><br><br>
+    <input type="submit" name="login" value="Connexion">
+</form>
+```
+### Étape 4 : Tester l'attaque (Sans ModSecurity actif)
+Avant d'activer la protection ModSecurity, testez la vulnérabilité de votre formulaire de connexion.
+
+Allez sur http://votre_ip_serveur/index.php.
+Dans le formulaire 2. Se connecter, entrez la charge utile (payload) classique suivante dans le champ "Utilisateur" :
+
+' OR '1'='1
+
+Et mettez n'importe quoi dans le mot de passe.
+
+:warning 
+Explication : La requête SQL exécutée par le serveur deviendra :
+
+SELECT * FROM utilisateurs WHERE username = '' OR '1'='1' AND password = '...'
+
+Comme 1=1 est toujours vrai, la base de données renverra le premier utilisateur de la table (souvent l'administrateur), permettant de contourner l'authentification. Vous devriez voir le message vert de réussite.
+
+### Dans l'URL du navigateur, tester l'injection SQL suivante: 
+
+http://<votre_ip_serveur>/?id=1' OR 1=1--
+
+<img width="537" height="353" alt="image" src="https://github.com/user-attachments/assets/26b5be62-cb31-45cc-8bd1-f514ab89136a" />
+
