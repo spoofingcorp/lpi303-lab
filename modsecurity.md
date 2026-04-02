@@ -567,9 +567,9 @@ UNION SELECT 1, password, 3 : Nous demandons 3 colonnes pour correspondre à la 
 
 `FROM utilisateurs WHERE username='admin'` : La cible de notre extraction.
 
-# : Commente le reste de la requête d'origine (le check du mot de passe).
+Le # sert à Commenter le reste de la requête d'origine (le check du mot de passe).
 
-Exécution avec curl
+### Exécution de l'attaque UNION avec curl
 Exécutez cette commande dans votre terminal :
 
 ```
